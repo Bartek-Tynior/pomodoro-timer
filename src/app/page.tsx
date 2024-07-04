@@ -1,113 +1,118 @@
 "use client";
-
-import { useEffect, useRef, useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import Header from "./components/Header";
+import Modal from "./components/Modal";
 
 export default function Home() {
-  const Ref = useRef(null);
+  // Timer
+  const [pomodoro, setPomodoro] = useState(25);
+  const [shortBreak, setShortBreak] = useState(5);
+  const [longBreak, setLongBreak] = useState(10);
+  const [seconds, setSecond] = useState(0);
+  const [stage, setStage] = useState(0);
+  const [consumedSecond, setConsumedSecond] = useState(0);
+  const [ticking, setTicking] = useState(false);
+  const [isTimeUp, setIsTimeUp] = useState(false);
+  const [openSetting, setOpenSetting] = useState(false);
 
-  const [timer, setTimer] = useState("00:00:10");
-  const [isPaused, setIsPaused] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(10);
+  const alarmRef = useRef();
+  const pomodoroRef = useRef();
+  const shortBreakRef = useRef();
+  const longBreakRef = useRef();
 
-  const getTimeRemaining = (endtime) => {
-    const total = Date.parse(endtime) - Date.parse(new Date().toString());
-    const seconds = Math.floor((total / 1000) % 60);
-    const minutes = Math.floor((total / 1000 / 60) % 60);
-    const hours = Math.floor((total / 1000 / 60 / 60) % 24);
-    return { total, hours, minutes, seconds };
+  const updateTimeDefaultValue = () => {
+    setPomodoro(pomodoroRef.current.value);
+    setShortBreak(shortBreakRef.current.value);
+    setLongBreak(longBreakRef.current.value);
+    setOpenSetting(false);
+    setSecond(0);
+    setConsumedSecond(0);
   };
 
-  const startTimer = (endtime) => {
-    let { total, hours, minutes, seconds } = getTimeRemaining(endtime);
-    if (total >= 0) {
-      setTimer(
-        (hours > 9 ? hours : "0" + hours) +
-          ":" +
-          (minutes > 9 ? minutes : "0" + minutes) +
-          ":" +
-          (seconds > 9 ? seconds : "0" + seconds)
-      );
-      setTimeLeft(total / 1000);
-    } else {
-      clearInterval(Ref.current);
+  const switchStage = (index) => {
+    const isYes =
+      consumedSecond && stage !== index
+        ? confirm("Are you sure you want to switch?")
+        : false;
+    if (isYes) {
+      reset();
+      setStage(index);
+    } else if (!consumedSecond) {
+      setStage(index);
     }
   };
 
-  const clearTimer = (endtime) => {
-    setTimer("00:00:10");
-    if (Ref.current) clearInterval(Ref.current);
-    const id = setInterval(() => {
-      startTimer(endtime);
-    }, 1000);
-    Ref.current = id;
+  const getTickingTime = () => {
+    const timeStage = {
+      0: pomodoro,
+      1: shortBreak,
+      2: longBreak,
+    };
+    return timeStage[stage];
+  };
+  const updateMinute = () => {
+    const updateStage = {
+      0: setPomodoro,
+      1: setShortBreak,
+      2: setLongBreak,
+    };
+    return updateStage[stage];
   };
 
-  const getDeadTime = () => {
-    let deadline = new Date();
-    deadline.setSeconds(deadline.getSeconds() + timeLeft);
-    return deadline;
+  const reset = () => {
+    setConsumedSecond(0);
+    setTicking(false);
+    setSecond(0);
+    updateTimeDefaultValue();
+  };
+
+  const timeUp = () => {
+    reset();
+    setIsTimeUp(true);
+    alarmRef.current.play();
+  };
+
+  const clockTicking = () => {
+    const minutes = getTickingTime();
+    const setMinutes = updateMinute();
+
+    if (minutes === 0 && seconds === 0) {
+      timeUp();
+    } else if (seconds === 0) {
+      setMinutes((minute) => minute - 1);
+      setSecond(59);
+    } else {
+      setSecond((second) => second - 1);
+    }
+  };
+
+  const startTimer = () => {
+    setIsTimeUp(false);
+    setTicking((ticking) => !ticking);
   };
 
   useEffect(() => {
-    clearTimer(getDeadTime());
-  }, []);
+    window.onbeforeunload = () => {
+      return consumedSecond ? "Show waring" : null;
+    };
 
-  const onClickStart = () => {
-    clearTimer(getDeadTime());
-    setIsPaused(false);
-  };
+    const timer = setInterval(() => {
+      if (ticking) {
+        setConsumedSecond((value) => value + 1);
+        clockTicking();
+      }
+    }, 1000);
 
-  const onClickPause = () => {
-    if (Ref.current) clearInterval(Ref.current);
-    setIsPaused(true);
-  };
+    return () => {
+      clearInterval(timer);
+    };
+  }, [seconds, pomodoro, shortBreak, longBreak, ticking]);
 
-  const onClickResume = () => {
-    if (isPaused) {
-      clearTimer(getDeadTime());
-      setIsPaused(false);
-    }
-  };
-
-  const onClickReset = () => {
-    setTimeLeft(10);
-    clearTimer(getDeadTime());
-  };
+  const options = ["Pomodoro", "Short Break", "Long Break"];
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between py-10 bg-black">
-      <header className="flex items-center justify-between w-full px-24">
-        <div className="flex gap-2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <path d="m9 12 2 2 4-4" />
-          </svg>
-
-          <span className="text-white">Pomodoro Timer</span>
-        </div>
-
-        <nav className="flex gap-8">
-          <a href="#" className="text-white">
-            Home
-          </a>
-          <a href="#" className="text-white">
-            About
-          </a>
-          <a href="#" className="text-white">
-            Settings
-          </a>
-        </nav>
-      </header>
+      <Header setOpenSetting={setOpenSetting} />
 
       <section className="px-24 mx-52">
         <div className="flex flex-col gap-8">
@@ -119,31 +124,35 @@ export default function Home() {
 
           <div className="flex items-center justify-center w-full">
             <div className="w-full bg-slate-600 h-80 rounded-lg text-center flex flex-col gap-4 justify-center items-center p-16">
-              <p className="text-8xl">{timer}</p>
-              <div className="flex gap-4">
+              <div className="flex gap-5 items-center">
+                {options.map((option, index) => {
+                  return (
+                    <h1
+                      key={index}
+                      className={` ${
+                        index === stage ? "bg-gray-500 bg-opacity-30" : ""
+                      } p-1 cursor-pointer transition-all rounded`}
+                      onClick={() => switchStage(index)}
+                    >
+                      {option}
+                    </h1>
+                  );
+                })}
+              </div>
+              <div
+                className="text-8xl timer-circle w-52 h-52 flex justify-center items-center"
+                id="timer"
+              >
+                <h1 className="text-8xl font-bold select-none m-0">
+                  {getTickingTime()}:{seconds.toString().padStart(2, "0")}
+                </h1>
+              </div>
+              <div className="flex gap-4 control-buttons">
                 <button
                   className="bg-blue-500 text-white px-10 py-4 rounded-lg"
-                  onClick={onClickStart}
+                  onClick={startTimer}
                 >
-                  Start
-                </button>
-                <button
-                  className="bg-blue-500 text-white px-10 py-4 rounded-lg"
-                  onClick={onClickPause}
-                >
-                  Pause
-                </button>
-                <button
-                  className="bg-blue-500 text-white px-10 py-4 rounded-lg"
-                  onClick={onClickResume}
-                >
-                  Resume
-                </button>
-                <button
-                  className="bg-blue-500 text-white px-10 py-4 rounded-lg"
-                  onClick={onClickReset}
-                >
-                  Restart
+                  {ticking ? "Stop" : "Start"}
                 </button>
               </div>
             </div>
@@ -155,6 +164,15 @@ export default function Home() {
         <p className="text-white">Made with ❤️ by</p>
         <p className="text-white">© 2021 Bart Tynior</p>
       </footer>
+
+      <Modal
+        openSetting={openSetting}
+        setOpenSetting={setOpenSetting}
+        pomodoroRef={pomodoroRef}
+        shortBreakRef={shortBreakRef}
+        longBreakRef={longBreakRef}
+        updateTimeDefaultValue={updateTimeDefaultValue}
+      />
     </main>
   );
 }
