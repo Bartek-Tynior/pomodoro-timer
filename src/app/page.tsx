@@ -13,6 +13,7 @@ export default function Home() {
   const [ticking, setTicking] = useState(false);
   const [isTimeUp, setIsTimeUp] = useState(false);
   const [openSetting, setOpenSetting] = useState(false);
+  const [tasks, setTasks] = useState([]); // New state for tasks
 
   const alarmRef = useRef();
   const pomodoroRef = useRef();
@@ -109,6 +110,11 @@ export default function Home() {
 
   const options = ["Pomodoro", "Short Break", "Long Break"];
 
+  const addTask = () => {
+    setTasks((prevTasks) => [...prevTasks, "task"]);
+    console.log(tasks);
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between py-10 bg-slate-100">
       <Header setOpenSetting={setOpenSetting} />
@@ -157,6 +163,22 @@ export default function Home() {
             </div>
           </div>
         </div>
+      </section>
+
+      <section className="mx-52">
+        <button onClick={addTask} className="w-full h-16 bg-slate-300 hover:bg-slate-400 justify-center items-center flex px-20 rounded-lg bg-opacity-30">
+          <svg className="text-slate-800" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14" /><path d="M12 5v14" />
+          </svg>
+        </button>
+      </section>
+
+      <section className="mx-52 h-16 overflow-y-auto p-4 no-scrollbar">
+        {tasks.map((task, index) => { 
+          return (
+            <p key={index} className="text-slate-800">{task}</p>
+          )
+        })}
       </section>
 
       <footer className="flex flex-col items-center justify-center">
