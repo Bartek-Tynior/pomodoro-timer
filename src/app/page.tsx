@@ -4,7 +4,6 @@ import Header from "./components/Header";
 import Modal from "./components/Modal";
 
 export default function Home() {
-  // Timer
   const [pomodoro, setPomodoro] = useState(25);
   const [shortBreak, setShortBreak] = useState(5);
   const [longBreak, setLongBreak] = useState(10);
@@ -111,26 +110,26 @@ export default function Home() {
   const options = ["Pomodoro", "Short Break", "Long Break"];
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between py-10 bg-black">
+    <main className="flex min-h-screen flex-col items-center justify-between py-10 bg-slate-100">
       <Header setOpenSetting={setOpenSetting} />
 
-      <section className="px-24 mx-52">
+      <section className="mx-52">
         <div className="flex flex-col gap-8">
           <div className="flex flex-col items-center justify-center">
-            <p className="text-white">
+            <p className="text-slate-800 font-semibold">
               A simple Pomodoro Timer to help you stay focused.
             </p>
           </div>
 
           <div className="flex items-center justify-center w-full">
-            <div className="w-full bg-slate-600 h-80 rounded-lg text-center flex flex-col gap-4 justify-center items-center p-16">
+            <div className="w-full bg-slate-800 shadow-2xl h-80 rounded-lg text-center flex flex-col gap-4 justify-center items-center p-16">
               <div className="flex gap-5 items-center">
                 {options.map((option, index) => {
                   return (
                     <h1
                       key={index}
                       className={` ${
-                        index === stage ? "bg-gray-500 bg-opacity-30" : ""
+                        index === stage ? "bg-gray-500 px-2 bg-opacity-30" : ""
                       } p-1 cursor-pointer transition-all rounded`}
                       onClick={() => switchStage(index)}
                     >
@@ -149,7 +148,7 @@ export default function Home() {
               </div>
               <div className="flex gap-4 control-buttons">
                 <button
-                  className="bg-blue-500 text-white px-10 py-4 rounded-lg"
+                  className="bg-blue-500 text-white w-28 h-12 rounded-lg"
                   onClick={startTimer}
                 >
                   {ticking ? "Stop" : "Start"}
@@ -161,8 +160,7 @@ export default function Home() {
       </section>
 
       <footer className="flex flex-col items-center justify-center">
-        <p className="text-white">Made with ❤️ by</p>
-        <p className="text-white">© 2021 Bart Tynior</p>
+        <p className="text-slate-800">Made with ❤️ by Bart Tynior</p>
       </footer>
 
       <Modal

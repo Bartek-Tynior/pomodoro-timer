@@ -4,6 +4,7 @@ export default function Header({ setOpenSetting }) {
       <div className="flex gap-2">
         <svg
           xmlns="http://www.w3.org/2000/svg"
+          className="text-slate-800"
           width="24"
           height="24"
           viewBox="0 0 24 24"
@@ -17,19 +18,19 @@ export default function Header({ setOpenSetting }) {
           <path d="m9 12 2 2 4-4" />
         </svg>
 
-        <span className="text-white">Pomodoro Timer</span>
+        <span className="text-slate-800 font-bold">Pomodoro Timer</span>
       </div>
 
       <nav className="flex gap-8">
-        <a href="#" className="text-white">
+        <a href="#" className="text-slate-800">
           Home
         </a>
-        <a href="#" className="text-white">
+        <a href="#" className="text-slate-800">
           About
         </a>
         <button
           onClick={() => setOpenSetting((value) => !value)}
-          className="text-white"
+          className="text-slate-800"
         >
           Settings
         </button>
